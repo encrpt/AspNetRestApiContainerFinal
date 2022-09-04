@@ -12,6 +12,7 @@ COPY ["AspNetRestApiContainer/AspNetRestApiContainer.Infrastructure.Shared/AspNe
 COPY ["AspNetRestApiContainer/AspNetRestApiContainer.Application/AspNetRestApiContainer.Application.csproj", "AspNetRestApiContainer/AspNetRestApiContainer.Application/"]
 COPY ["AspNetRestApiContainer/AspNetRestApiContainer.Domain/AspNetRestApiContainer.Domain.csproj", "AspNetRestApiContainer/AspNetRestApiContainer.Domain/"]
 COPY ["AspNetRestApiContainer/AspNetRestApiContainer.Infrastructure.Persistence/AspNetRestApiContainer.Infrastructure.Persistence.csproj", "AspNetRestApiContainer/AspNetRestApiContainer.Infrastructure.Persistence/"]
+
 RUN dotnet restore "AspNetRestApiContainer/AspNetRestApiContainer.WebApi/AspNetRestApiContainer.WebApi.csproj"
 COPY . .
 WORKDIR "/src/AspNetRestApiContainer/AspNetRestApiContainer.WebApi"
@@ -23,4 +24,11 @@ RUN dotnet publish "AspNetRestApiContainer.WebApi.csproj" -c Release -o /app/pub
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "AspNetRestApiContainer.WebApi.dll"]
+
+# added missing xml file
+COPY AspNetRestApiContainer/AspNetRestApiContainer.WebApi/AspNetRestApiContainer.WebApi.xml ./
+
+# added wait for db
+COPY ./image-content/wait-for-it.sh ./
+COPY ./image-content/dockerInit.sh ./dockerInit
+

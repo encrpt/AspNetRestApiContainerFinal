@@ -1,22 +1,26 @@
 version: '3.4'
 
 services:
-  aspnetrestapicontainer.webapi:
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-    ports:
-      - "80"
-      - "443"
-      - "44378:443"
-    volumes:
-      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
-      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
   db:
     container_name: AspNetRestApiContainerDb
     environment:
-        SA_PASSWORD: "SwN12345678"
-        ACCEPT_EULA: "Y"
+      - SA_PASSWORD=SwN12345678
+      - ACCEPT_EULA=Y
     restart: always
     ports:
-        - "1433:1433"
+      - "1433:1433"
+  aspnetrestapicontainer.webapi:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:9001;http://+:5000
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=Test1234
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    depends_on:
+      - 'db'
+    ports:
+      - 443:9001
+    volumes:
+      # - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      # - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      - ~/.aspnet/https:/https:ro
+    command: './dockerInit db 1433'
